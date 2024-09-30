@@ -1,0 +1,113 @@
+// Declaração dos pinos
+const int trigPinQI = 13;
+const int echoPinQI = 12;
+
+const int trigPinQII  = 11;
+const int echoPinQII  = 10;
+
+const int trigPinQIII = 9;
+const int echoPinQIII = 8;
+
+const int trigPinQIV  = 3;
+const int echoPinQIV  = 2;
+
+const int ledPin  = 7;
+// Fim da declaração dos pinos
+
+// Variáveis de controle para saber se a leitura deve ser feita
+bool leituraAtivaQI = true;
+bool leituraAtivaQII = true;
+bool leituraAtivaQIII = true;
+bool leituraAtivaQIV = true;
+
+
+
+void setup() {
+  Serial.begin(115200);
+  // Definição dos pinos
+  pinMode(ledPin, OUTPUT);
+
+  pinMode(trigPinQI, OUTPUT);
+  pinMode(echoPinQI, INPUT);
+
+  pinMode(trigPinQII, OUTPUT);
+  pinMode(echoPinQII, INPUT);
+
+  pinMode(trigPinQIII, OUTPUT);
+  pinMode(echoPinQIII, INPUT);
+
+  pinMode(trigPinQIV, OUTPUT);
+  pinMode(echoPinQIV, INPUT);
+}
+
+void loop() {
+  // Chamada das funções de leitura
+  long distQI   = leitura_quadranteI();
+  long distQII  = leitura_quadranteII();
+  long distQIII = leitura_quadranteIII();
+  long distQIV  = leitura_quadranteIV();
+
+  // Exibe as distâncias lidas de cada quadrante
+  Serial.print("Distância QI: "); Serial.println(distQI);
+  Serial.print("Distância QII: "); Serial.println(distQII);
+  Serial.print("Distância QIII: "); Serial.println(distQIII);
+  Serial.print("Distância QIV: "); Serial.println(distQIV);
+
+  // Verifica se TODOS os quadrantes estão no limite
+  if ((distQI == 20) && (distQII == 20) && 
+      (distQIII == 20) && (distQIV == 20)) {
+    digitalWrite(ledPin, HIGH); // Acende o LED quando TODOS os quadrantes marcam 20 cm 
+  } else {
+    digitalWrite(ledPin, LOW);  // Desliga o LED se algum quadrante estiver acima de 20 cm
+  }
+
+
+  delay(5000); // Atraso para próxima leitura
+}
+
+// Funções para leitura dos quadrantes
+long leitura_quadranteI() {
+  return medir_distancia(trigPinQI, echoPinQI);
+}
+
+long leitura_quadranteII() {
+  return medir_distancia(trigPinQII, echoPinQII);
+}
+
+long leitura_quadranteIII() {
+  return medir_distancia(trigPinQIII, echoPinQIII);
+}
+
+long leitura_quadranteIV() {
+  return medir_distancia(trigPinQIV, echoPinQIV);
+}
+
+// Função genérica para medir a distância de um sensor
+long medir_distancia(int trigPin, int echoPin) {
+  long limite = 20;
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(20);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(25);
+  digitalWrite(trigPin, LOW);
+
+  // Medir o tempo de retorno do eco com timeout de 53 ms (máx. distância 90cm)
+  long duration = pulseIn(echoPin, HIGH, 53000); 
+
+  // Se a leitura falhar, retorna um valor inválido
+  if (duration == 0) {
+    return 9999; // Valor inválido (fora de alcance)
+  }
+
+  // Converte o tempo de duração em distância
+  long distance = duration * 0.034 / 2;
+
+  // Validação: Se a distância for maior que 90 cm ou menor que 28 cm
+  if (distance > 90 || distance < 28) {
+    return limite; // Retorna o limite
+  }
+
+  return distance; // Retorna a distância válida
+}
