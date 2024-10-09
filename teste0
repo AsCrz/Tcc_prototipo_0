@@ -14,13 +14,6 @@ const int echoPinQIV  = 2;
 const int ledPin  = 7;
 // Fim da declaração dos pinos
 
-// Variáveis de controle para saber se a leitura deve ser feita
-bool leituraAtivaQI = true;
-bool leituraAtivaQII = true;
-bool leituraAtivaQIII = true;
-bool leituraAtivaQIV = true;
-
-
 
 void setup() {
   Serial.begin(115200);
@@ -82,7 +75,7 @@ long leitura_quadranteIV() {
   return medir_distancia(trigPinQIV, echoPinQIV);
 }
 
-// Função genérica para medir a distância de um sensor
+// Função para medir a distância de um sensor
 long medir_distancia(int trigPin, int echoPin) {
   long limite = 20;
 
