@@ -50,7 +50,12 @@ void loop() {
   if ((distQI == 20) && (distQII == 20) && 
       (distQIII == 20) && (distQIV == 20)) {
     digitalWrite(ledPin, HIGH); // Acende o LED quando TODOS os quadrantes marcam 20 cm 
-  } else {
+  } else if ((distQI == 999) && (distQII == 999) && 
+      (distQIII == 999) && (distQIV == 999)) {
+        digitalWrite(ledPin, HIGH);
+        delay(500);
+        digitalWrite(ledPin, LOW);
+  }else {
     digitalWrite(ledPin, LOW);  // Desliga o LED se algum quadrante estiver acima de 20 cm
   }
 
@@ -75,10 +80,10 @@ long leitura_quadranteIV() {
   return medir_distancia(trigPinQIV, echoPinQIV);
 }
 
-// Função para medir a distância de um sensor
+// Função genérica para medir a distância de um sensor
 long medir_distancia(int trigPin, int echoPin) {
   long limite = 20;
-
+  long fora_de_alcance = 999;
   digitalWrite(trigPin, LOW);
   delayMicroseconds(20);
 
@@ -86,8 +91,8 @@ long medir_distancia(int trigPin, int echoPin) {
   delayMicroseconds(25);
   digitalWrite(trigPin, LOW);
 
-  // Medir o tempo de retorno do eco com timeout de 53 ms (máx. distância 90cm)
-  long duration = pulseIn(echoPin, HIGH, 53000); 
+  // Medir o tempo de retorno do eco com timeout de 38 ms (máx. distância 400cm)
+  long duration = pulseIn(echoPin, HIGH, 38000); // Aproximadamente 400 cm (38000 µs)
 
   // Se a leitura falhar, retorna um valor inválido
   if (duration == 0) {
@@ -98,8 +103,12 @@ long medir_distancia(int trigPin, int echoPin) {
   long distance = duration * 0.034 / 2;
 
   // Validação: Se a distância for maior que 90 cm ou menor que 28 cm
-  if (distance > 90 || distance < 28) {
+  if (distance < 25) {
     return limite; // Retorna o limite
+  }
+
+  if(distance > 95){
+    return fora_de_alcance;
   }
 
   return distance; // Retorna a distância válida
