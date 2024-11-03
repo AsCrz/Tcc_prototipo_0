@@ -39,6 +39,7 @@ void loop() {
   long distQII  = leitura_quadranteII();
   long distQIII = leitura_quadranteIII();
   long distQIV  = leitura_quadranteIV();
+  int contador  = 0;
 
   // Exibe as distâncias lidas de cada quadrante
   Serial.print("Distância QI: "); Serial.println(distQI);
@@ -52,12 +53,17 @@ void loop() {
     digitalWrite(ledPin, HIGH); // Acende o LED quando TODOS os quadrantes marcam 20 cm 
   } else if ((distQI == 999) && (distQII == 999) && 
       (distQIII == 999) && (distQIV == 999)) {
-        digitalWrite(ledPin, HIGH);
-        delay(500);
-        digitalWrite(ledPin, LOW);
+       contador++;
   }else {
     digitalWrite(ledPin, LOW);  // Desliga o LED se algum quadrante estiver acima de 20 cm
   }
+
+ if(contador>5){
+   digitalWrite(ledPin, HIGH);
+    delay(500);
+  digitalWrite(ledPin, LOW);
+    delay(500);
+}
 
 
   delay(5000); // Atraso para próxima leitura
@@ -103,7 +109,7 @@ long medir_distancia(int trigPin, int echoPin) {
   long distance = duration * 0.034 / 2;
 
   // Validação: Se a distância for maior que 90 cm ou menor que 28 cm
-  if (distance < 25) {
+  if (distance < 22) {
     return limite; // Retorna o limite
   }
 
