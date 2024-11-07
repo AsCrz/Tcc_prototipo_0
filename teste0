@@ -1,3 +1,4 @@
+//sudo chmod a+rw /dev/ttyACM0 
 // Declaração dos pinos
 const int trigPinQI = 13;
 const int echoPinQI = 12;
@@ -49,29 +50,47 @@ void loop() {
   Serial.print("Distância QIV: "); Serial.println(distQIV);
 
   // Verifica se TODOS os quadrantes estão no limite
-  if ((distQI >= 18 && distQI <= 22) && 
-      (distQII >= 18 && distQII <= 22) && 
-      (distQIII >= 18 && distQIII <= 22) && 
-      (distQIV >= 18 && distQIV <= 22)) {
+  if ((distQI == 20) && 
+      (distQII == 20) && 
+      (distQIII == 20) && 
+      (distQIV == 20)) {
     digitalWrite(ledPin, HIGH); // Acende o LED quando TODOS os quadrantes estão próximos de 20 cm 
   } else if ((distQI == 9999) && (distQII == 9999) && 
              (distQIII == 9999) && (distQIV == 9999)) {
     contador++;
   } else {
-    digitalWrite(ledPin, LOW);  // Desliga o LED se algum quadrante estiver acima do limite
-    contador = 0; // Reseta o contador se a leitura estiver no intervalo correto
+    digitalWrite(ledPin, LOW);
   }
 
   // Aciona o LED intermitente se o contador exceder 5
   if (contador > 5) {
-    digitalWrite(ledPin, HIGH);
-    delay(500);
-    digitalWrite(ledPin, LOW);
-    delay(500);
+   piscarLED();
   }
 
   delay(5000); // Atraso para próxima leitura
 }
+
+// Função para piscar o LED enquanto o contador estiver acima de 5
+void piscarLED() {
+  while (contador > 5) {
+    digitalWrite(ledPin, HIGH);
+    delay(500);  // Tempo em que o LED permanece aceso
+    digitalWrite(ledPin, LOW);
+    delay(500);  // Tempo em que o LED permanece apagado
+
+    // Atualiza o contador caso ele seja ajustado externamente
+    long distQI = leitura_quadranteI();
+    long distQII = leitura_quadranteII();
+    long distQIII = leitura_quadranteIII();
+    long distQIV = leitura_quadranteIV();
+
+    if ((distQI != 9999) || (distQII != 9999) || (distQIII != 9999) || (distQIV != 9999)) {
+      contador = 0; // Reinicia o contador se um quadrante volta ao normal
+    }
+  }
+}
+
+
 
 // Funções para leitura dos quadrantes
 long leitura_quadranteI() {
@@ -114,7 +133,7 @@ long medir_distancia(int trigPin, int echoPin) {
   long distance = duration * 0.034 / 2;
 
   // Validação: Se a distância for maior que 95 cm ou menor que 22 cm
-  if (distance < 22) {
+  if (distance < 21) {
     return limite; // Retorna o limite
   }
 
