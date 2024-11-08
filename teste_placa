@@ -1,0 +1,128 @@
+#define HELTEC_WIRELESS_STICK
+#define HELTEC_POWER_BUTTON
+
+#include <heltec_unofficial.h>
+
+
+// Declaração dos pinos
+const int trigPinQI = 46;
+const int echoPinQI = 37;
+const int trigPinQII  = 39;
+const int echoPinQII  = 40;
+const int trigPinQIII = 3;
+const int echoPinQIII = 2;
+const int trigPinQIV  = 7;
+const int echoPinQIV  = 6;
+const int buzzer = 35; 
+
+// Contador de erro persistente
+int contador = 0;
+
+void setup() {
+  // Inicializa o Serial Monitor
+  Serial.begin(115200);
+
+  heltec_setup();
+
+  Serial.println("Serial works");
+  // Display
+  display.println("Display works");
+  
+  // Configuração dos pinos
+  pinMode(buzzer, OUTPUT);
+  pinMode(trigPinQI, OUTPUT);
+  pinMode(echoPinQI, INPUT);
+  pinMode(trigPinQII, OUTPUT);
+  pinMode(echoPinQII, INPUT);
+  pinMode(trigPinQIII, OUTPUT);
+  pinMode(echoPinQIII, INPUT);
+  pinMode(trigPinQIV, OUTPUT);
+  pinMode(echoPinQIV, INPUT);
+}
+
+void loop() {
+  heltec_loop();
+  // Leitura das distâncias
+  long distQI = leitura_quadranteI();
+  long distQII = leitura_quadranteII();
+  long distQIII = leitura_quadranteIII();
+  long distQIV = leitura_quadranteIV();
+
+  // Exibe as distâncias no monitor serial
+  Serial.print("Distância QI: "); Serial.println(distQI);
+  Serial.print("Distância QII: "); Serial.println(distQII);
+  Serial.print("Distância QIII: "); Serial.println(distQIII);
+  Serial.print("Distância QIV: "); Serial.println(distQIV);
+
+  // Verifica condições para o LED/buzzer
+  if ((distQI == 20) && (distQII == 20) && (distQIII == 20) && (distQIV == 20)) {
+    digitalWrite(buzzer, HIGH); // Liga o buzzer se todos os quadrantes estão a 20 cm
+  } else if ((distQI == 9999) && (distQII == 9999) && (distQIII == 9999) && (distQIV == 9999)) {
+    contador++;
+  } else {
+    digitalWrite(buzzer, LOW); // Desliga o buzzer caso um quadrante esteja fora do limite
+  }
+
+  // aciona o buzzer se contador for maior que 5
+  if (contador > 5) {
+    acionarBuzzer();
+  }
+
+  delay(5000); // Intervalo para a próxima leitura
+}
+
+// Função para piscar o buzzer enquanto o contador estiver acima de 5
+void acionarBuzzer() {
+  while (contador > 5) {
+    tone(buzzer, 1500); // Liga o buzzer com frequência de 1500 Hz
+    delay(500);
+    noTone(buzzer); // Desliga o buzzer
+    delay(500);
+
+    // Atualiza o contador
+    long distQI = leitura_quadranteI();
+    long distQII = leitura_quadranteII();
+    long distQIII = leitura_quadranteIII();
+    long distQIV = leitura_quadranteIV();
+
+    if ((distQI != 9999) || (distQII != 9999) || (distQIII != 9999) || (distQIV != 9999)) {
+      contador = 0; // Reinicia o contador se algum quadrante voltar ao normal
+    }
+  }
+}
+
+// Funções de leitura dos quadrantes
+long leitura_quadranteI() { return medir_distancia(trigPinQI, echoPinQI); }
+long leitura_quadranteII() { return medir_distancia(trigPinQII, echoPinQII); }
+long leitura_quadranteIII() { return medir_distancia(trigPinQIII, echoPinQIII); }
+long leitura_quadranteIV() { return medir_distancia(trigPinQIV, echoPinQIV); }
+
+// Função genérica para medir a distância de um sensor
+long medir_distancia(int trigPin, int echoPin) {
+  long limite = 20;
+  long fora_de_alcance = 9999;
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(20);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(25);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 38000);
+
+  if (duration == 0) {
+    return fora_de_alcance;
+  }
+
+  long distance = duration * 0.034 / 2;
+
+  if (distance < 21) {
+    return limite;
+  }
+
+  if (distance > 95) {
+    return fora_de_alcance;
+  }
+
+  return distance;
+}
