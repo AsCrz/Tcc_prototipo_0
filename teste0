@@ -12,7 +12,7 @@ const int echoPinQIII = 8;
 const int trigPinQIV  = 3;
 const int echoPinQIV  = 2;
 
-const int ledPin  = 7;
+int buzzer = 7;//
 // Fim da declaração dos pinos
 
 // Contador de erro persistente
@@ -21,7 +21,7 @@ int contador = 0;
 void setup() {
   Serial.begin(115200);
   // Definição dos pinos
-  pinMode(ledPin, OUTPUT);
+  pinMode(buzzer, OUTPUT);
 
   pinMode(trigPinQI, OUTPUT);
   pinMode(echoPinQI, INPUT);
@@ -73,10 +73,10 @@ void loop() {
 // Função para piscar o LED enquanto o contador estiver acima de 5
 void piscarLED() {
   while (contador > 5) {
-    digitalWrite(ledPin, HIGH);
-    delay(500);  // Tempo em que o LED permanece aceso
-    digitalWrite(ledPin, LOW);
-    delay(500);  // Tempo em que o LED permanece apagado
+    tone(buzzer, 1500);//Ligando o buzzer com uma frequência de 1500 Hz.
+    delay(500);//Intervalo de 500 milissegundos
+    noTone(buzzer);//Desligando o buzzer.
+    delay(500);//Intervalo de 500 milissegundos
 
     // Atualiza o contador caso ele seja ajustado externamente
     long distQI = leitura_quadranteI();
