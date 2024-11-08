@@ -47,12 +47,13 @@ void loop() {
   long distQII = leitura_quadranteII();
   long distQIII = leitura_quadranteIII();
   long distQIV = leitura_quadranteIV();
-
+  
+  both.print("\nErros: "); both.print(contador);
   // Exibe as distâncias no monitor serial
-  Serial.print("Distância QI: "); Serial.println(distQI);
-  Serial.print("Distância QII: "); Serial.println(distQII);
-  Serial.print("Distância QIII: "); Serial.println(distQIII);
-  Serial.print("Distância QIV: "); Serial.println(distQIV);
+  both.print("QI: "); both.println(distQI);
+  both.print("QII: "); both.println(distQII);
+  both.print("QIII: "); both.println(distQIII);
+  both.print("QIV: "); both.println(distQIV);
 
   // Verifica condições para o LED/buzzer
   if ((distQI == 20) && (distQII == 20) && (distQIII == 20) && (distQIV == 20)) {
@@ -62,7 +63,8 @@ void loop() {
   } else {
     digitalWrite(buzzer, LOW); // Desliga o buzzer caso um quadrante esteja fora do limite
   }
-
+ 
+  
   // aciona o buzzer se contador for maior que 5
   if (contador > 5) {
     acionarBuzzer();
