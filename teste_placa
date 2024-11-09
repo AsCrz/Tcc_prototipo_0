@@ -50,7 +50,7 @@ void loop() {
   
   both.print("\nErros: "); both.print(contador);
   // Exibe as distâncias no monitor serial
-  both.print("QI: "); both.println(distQI);
+  both.print("\nQI: "); both.println(distQI);
   both.print("QII: "); both.println(distQII);
   both.print("QIII: "); both.println(distQIII);
   both.print("QIV: "); both.println(distQIV);
